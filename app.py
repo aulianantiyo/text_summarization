@@ -43,18 +43,6 @@ def extractive_summary(text: str, ratio: float = 0.3) -> str:
     """Generate extractive summary using TextRank algorithm"""
     return summarizer.summarize(text, ratio=ratio)
 
-def tfidf_summary(text: str, num_sentences: int = 5) -> str:
-    """Generate extractive summary using TF-IDF"""
-    sentences = sent_tokenize(text)
-    if len(sentences) <= num_sentences:
-        return text
-        
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(sentences)
-    scores = tfidf_matrix.sum(axis=1).tolist()
-    ranked_sentences = [x for _, x in sorted(zip(scores, sentences), reverse=True)]
-    return ' '.join(ranked_sentences[:num_sentences])
-
 @st.cache_resource
 def load_summarizer():
     """Load and cache the BART summarizer"""
@@ -90,7 +78,7 @@ def main():
         st.header("Options")
         method = st.selectbox(
             "Summarization Method",
-            ['extractive', 'abstractive', 'tf-idf'],
+            ['extractive', 'abstractive'],
             help="Choose the summarization technique"
         )
     
@@ -136,8 +124,6 @@ def main():
                     # Generate summary based on selected method
                     if method == "extractive":
                         summary = extractive_summary(text, ratio)
-                    elif method == "tf-idf":
-                        summary = tfidf_summary(text)
                     else:
                         summary = abstractive_summary(text)
 
@@ -186,11 +172,6 @@ def main():
            - Uses BART neural network to generate new text
            - Can rephrase and combine information
            - May produce more natural summaries
-        
-        3. **TF-IDF Summarization**
-           - Uses term frequency to identify important sentences
-           - Good for technical documents
-           - Maintains original wording
         """)
 
 if __name__ == "__main__":
